@@ -1,0 +1,11 @@
+%html
+  %head
+    = haml(:header)
+  %body
+    %header
+      = haml(:navigation)
+    %main
+      %h1{style: "color: red"}= "Error: #{@error_message}"
+      %article 
+        %p Please try refreshing the page or going back to the previous one.
+      

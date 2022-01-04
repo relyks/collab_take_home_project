@@ -1,0 +1,13 @@
+%html
+  %head
+    = haml(:header)
+  %body
+    %header
+      = haml(:navigation)
+    %main{id: 'view'}
+      %h2= @video.title
+      %section
+        %iframe{'id' => "ytplayer", 'type' => "text/html", 'width' => "640", 'height' => "360", 'src' => "https://www.youtube.com/embed/#{@video.video_id}?autoplay=0", 'frameborder' =>"0", allowfullscreen: true}
+        %br
+        - if @has_multiple_videos
+          %button{'hx-get' => "/playlist-viewer/playlist/#{@playlist_id}/video_view/1", 'hx-target' => '#view'} Next

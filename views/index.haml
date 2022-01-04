@@ -1,0 +1,66 @@
+%html
+  %head
+    = haml(:header)
+  %body
+    %header
+      = haml(:navigation)
+      :javascript
+        htmx.on("htmx:afterSwap", (content) => {
+          var checkboxes = document.querySelectorAll('input[type=checkbox]');
+          var add_existing_button = document.getElementById('add_existing_button');
+          var add_to_new_playlist_button = document.getElementById('add_to_new_playlist_button');
+          if (!Array.from(checkboxes).some(cb => cb.checked)) {
+            add_existing_button.disabled = true;
+            add_to_new_playlist_button.value = 'Create new playlist';
+          }
+          checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', (event) => {
+              if (event.target.checked) {
+                add_existing_button.disabled = false;
+                add_to_new_playlist_button.value = 'Add to new playlist';
+              } 
+              else {
+                if (!Array.from(checkboxes).some(cb => cb.checked)) {
+                  add_existing_button.disabled = true;
+                  add_to_new_playlist_button.value = 'Create new playlist';
+                }
+              }
+            });
+          });
+        });
+
+        function clear_selected_videos() 
+        {
+          document.getElementById('add_existing_button').disabled = true;
+          document.querySelectorAll('input[type=checkbox]').forEach(e => e.checked = false);
+          document.getElementById('add_to_new_playlist_button').value = 'Create new playlist';
+        }
+
+        function select_all_videos()
+        {
+          document.getElementById('add_existing_button').disabled = false;
+          document.querySelectorAll('input[type=checkbox]').forEach(e => e.checked = true);
+          document.getElementById('add_to_new_playlist_button').value = 'Add to new playlist';
+        }
+    %main
+      %h2 Fetched Videos
+      %article 
+        %p Check the videos you would like to be part of a playlist. Those videos can be added to an already existing playlist or to a new playlist. You can create a new blank playlist if no videos are selected.
+      %hr
+      %section
+        %form{'hx-put' => '/playlist-manager/playlist', 'hx-target' => '#playlist_list', 'hx-include' => '#video_ids'}
+          %select{'name' => 'selected_playlist', 'id' => 'playlist_list', 'hx-get' => '/playlist-manager/playlists', 'hx-trigger' => 'load', 'hx-swap' => 'innerHTML', 'required' => true}
+            %option{'value' => '', 'disabled' => true, 'selected' => false, 'hidden' => true}
+          %input{'type' => 'submit', 'value' => 'Add to existing playlist', 'id' => 'add_existing_button', 'disabled' => true}
+        %form{'hx-post' => '/playlist-manager/playlist', 'hx-target' => '#playlist_list', 'hx-include' => '#video_ids'}
+          %label{'for' => 'new_playlist_name'}
+          %input{'type' => 'text', 'id' => 'new_playlist_name', 'name' => 'new_playlist_name', 'autocomplete' => 'off', 'value' => '', 'placeholder' => 'New playlist name', 'required' => true}
+          %input{'type' => 'submit', 'id' => 'add_to_new_playlist_button', 'value' => 'Create new playlist'}
+      %section
+        %button{'onclick' => "clear_selected_videos()"} Clear selected videos
+      %section
+        %button{'onclick' => "select_all_videos()"} Select all
+      %hr
+      %section
+        %input{'type' => 'text', 'autocomplete' => 'off', 'value' => '', 'name' => 'title_query', 'placeholder' => 'Type to search titles...', 'hx-get' => '/search', 'hx-trigger' => 'keyup changed delay:100ms', 'hx-target' => '#video_ids'}
+      %section{'hx-get' => "/index/videos/page/#{@page_number}", 'hx-trigger' => 'load', 'hx-swap' => 'innerHTML', 'id' => 'video_ids'}

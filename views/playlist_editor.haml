@@ -1,0 +1,36 @@
+%html
+  %head
+    = haml(:header)
+    %script{src: 'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js'}
+    :javascript
+      htmx.on("htmx:afterSwap", function(content) {
+        var sortables = document.querySelectorAll(".sortable");
+        sortables.forEach((sortable) => {
+          new Sortable(sortable, { animation: 300 });
+        });
+      });
+  %body
+    %header
+      = haml(:navigation)
+    %main
+      %h2 Playlist Editor
+      %article 
+        %p Remove videos within a playlist by hitting delete for that specific video. Reorder videos within a playlist by dragging and dropping to the desired location.
+      %hr
+      %section
+        #main_view
+          %button{'hx-get' => "/playlist-manager/edit-playlist/#{@playlist.id}/reorder_view", 'hx-trigger' => 'click', 'hx-target' => '#main_view'} Reorder
+          %br
+          %table
+            %thead
+              %tr
+                %td 
+                %td Playlist name
+                %td 
+            %tbody{'hx-confirm'=>"Are you sure you want delete?", 'hx-swap' => "innerHTML", 'id' => 'deletion_video_list'}
+              - @playlist.each_video_with_index do |video, index|
+                %tr
+                  %td= (index + 1).to_s
+                  %td= video.title
+                  %td 
+                    %button{'hx-delete' => "/playlist-manager/edit-playlist/#{@playlist.id}/video/#{index}", 'hx-trigger' => 'click', 'hx-target' => '#deletion_video_list'} Delete

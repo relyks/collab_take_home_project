@@ -1,0 +1,37 @@
+%html
+  %head
+    = haml(:header)
+  %body
+    %header
+      = haml(:navigation)
+    %main
+      %h2 Playlist Manager
+      %article 
+        %p Edit, view, or delete playlists here.
+      %hr
+      %section
+        %table
+          %thead
+            %tr
+              %td Playlist name
+              %td Total videos
+              %td 
+              %td 
+              %td
+          %tbody{'hx-confirm'=>"Are you sure you want delete?", 'hx-target'=>"closest tr", 'hx-swap'=>"outerHTML swap"}
+            - @playlists.each do |playlist|
+              %tr
+                %td= playlist.name
+                %td= playlist.videos.length
+                - if !playlist.videos.empty?
+                  %td
+                    %a{href: '/playlist-viewer/playlist/' + playlist.id} View
+                  %td
+                    %button{'onclick' => "location.href = '/playlist-manager/edit-playlist/#{playlist.id}'"} Edit
+                  %td 
+                    %button{'hx-delete' => '/playlist-manager/playlist/' + playlist.id, 'hx-trigger' => 'click'} Delete
+                - else
+                  %td
+                  %td
+                  %td
+                    %button{'hx-delete' => '/playlist-manager/playlist/' + playlist.id, 'hx-trigger' => 'click'} Delete
